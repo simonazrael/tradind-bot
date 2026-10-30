@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmic Trading Bot & Multi-Asset Dashboard</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TradingView Lightweight Widget Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navbar -->
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 bg-emerald-500 rounded-full animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-wider text-white">TRADING BOT <span class="text-emerald-400 font-light">TERMINAL</span></h1>
+        </div>
+        <div class="text-sm text-slate-400 hidden sm:block">
+            Multi-Asset Scanner: <span class="text-slate-200 font-medium">Crypto, Forex, Metals & Stocks</span>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full">
+        
+        <!-- Left Column: Asset Selection & Stats Panel (1 Column wide) -->
+        <div class="space-y-6 flex flex-col">
+            
+            <!-- Asset Selector Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-3">Select Market Asset</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="switchAsset('BTCUSD', 'COINBASE:BTCUSD')" class="asset-btn bg-emerald-600 text-white px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-emerald-500">BTC / USD</button>
+                    <button onclick="switchAsset('ETHUSD', 'COINBASE:ETHUSD')" class="asset-btn bg-slate-800 text-slate-300 px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-slate-700">ETH / USD</button>
+                    <button onclick="switchAsset('EURUSD', 'FX:EURUSD')" class="asset-btn bg-slate-800 text-slate-300 px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-slate-700">EUR / USD</button>
+                    <button onclick="switchAsset('GBPUSD', 'FX:GBPUSD')" class="asset-btn bg-slate-800 text-slate-300 px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-slate-700">GBP / USD</button>
+                    <button onclick="switchAsset('GOLD', 'COMEX:GC1!')" class="asset-btn bg-slate-800 text-slate-300 px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-slate-700">Gold (GC)</button>
+                    <button onclick="switchAsset('APPLE', 'NASDAQ:AAPL')" class="asset-btn bg-slate-800 text-slate-300 px-3 py-2.5 rounded-lg font-semibold text-sm transition hover:bg-slate-700">AAPL Stock</button>
+                </div>
+            </div>
+
+            <!-- Signal & Score Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <span id="active-asset-label" class="text-lg font-bold text-white">BTC-USD</span>
+                        <span id="badge-status" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">WAIT / NO TRADE</span>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-lg p-4 mb-4 border border-slate-800/60">
+                        <div class="text-xs text-slate-400 mb-1">Probability Score</div>
+                        <div class="flex items-baseline space-x-2">
+                            <span id="score-val" class="text-3xl font-black text-amber-400">40</span>
+                            <span class="text-slate-500 text-sm">/ 100 target 70+</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+                            <div id="score-bar" class="bg-amber-400 h-full transition-all duration-500" style="width: 40%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Factor Breakdown Checklist -->
+                    <div class="space-y-2.5 text-sm" id="breakdown-list">
+                        <div class="flex items-center space-x-2 text-slate-400">
+                            <span class="text-rose-400 font-bold">✗</span>
+                            <span>Weak Trend: Structure is mixed or consolidating.</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-slate-300">
+                            <span class="text-emerald-400 font-bold">✓</span>
+                            <span>Volume Confirmation: Active institutional backing.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+                    Automated GitHub Actions Cron: Active Daily
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live TradingView Chart (2 Columns wide) -->
+        <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-lg flex flex-col h-[550px] lg:h-auto">
+            <div class="flex justify-between items-center mb-3 px-2">
+                <span class="text-sm font-semibold tracking-wider text-slate-400">Live Interactive Technical Chart</span>
+                <span class="text-xs text-emerald-400 bg-emerald-950/50 px-2.5 py-1 rounded border border-emerald-800/50">Real-Time Feed</span>
+            </div>
+            <!-- Embedded TradingView Widget Container -->
+            <div id="tradingview_widget" class="w-full flex-1 rounded-lg overflow-hidden bg-slate-950"></div>
+        </div>
+
+    </main>
+
+    <!-- Script to handle switching assets and rendering live TradingView charts -->
+    <script>
+        let tvWidget = null;
+
+        function initChart(symbol) {
+            document.getElementById('tradingview_widget').innerHTML = "";
+            tvWidget = new TradingView.widget({
+                "width": "100%",
+                "height": "100%",
+                "symbol": symbol,
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": false,
+                "container_id": "tradingview_widget"
+            });
+        }
+
+        // Initialize with Bitcoin on page load
+        initChart("COINBASE:BTCUSD");
+
+        function switchAsset(assetName, tvSymbol) {
+            // Update active button styles
+            document.querySelectorAll('.asset-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event.target.classList.remove('bg-slate-800', 'text-slate-300');
+            event.target.classList.add('bg-emerald-600', 'text-white');
+
+            // Update UI label
+            document.getElementById('active-asset-label').innerText = assetName;
+            
+            // Dynamic mock score adjustments per asset class
+            let score = 40;
+            if(assetName === 'ETHUSD') score = 50;
+            if(assetName === 'EURUSD') score = 65;
+            if(assetName === 'GBPUSD') score = 74; // High probability setup
+            if(assetName === 'GOLD') score = 78;   // High probability setup
+            if(assetName === 'APPLE') score = 55;
+
+            document.getElementById('score-val').innerText = score;
+            document.getElementById('score-bar').style.width = score + "%";
+
+            const badge = document.getElementById('badge-status');
+            const scoreValEl = document.getElementById('score-val');
+            const scoreBarEl = document.getElementById('score-bar');
+
+            if(score >= 70) {
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                badge.innerText = "HIGH PROBABILITY (>=70%)";
+                scoreValEl.className = "text-3xl font-black text-emerald-400";
+                scoreBarEl.className = "bg-emerald-400 h-full transition-all duration-500";
+            } else {
+                badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                badge.innerText = "WAIT / NO TRADE";
+                scoreValEl.className = "text-3xl font-black text-amber-400";
+                scoreBarEl.className = "bg-amber-400 h-full transition-all duration-500";
+            }
+
+            // Reload chart with the newly selected symbol feed
+            initChart(tvSymbol);
+        }
+    </script>
+</body>
+</html>
